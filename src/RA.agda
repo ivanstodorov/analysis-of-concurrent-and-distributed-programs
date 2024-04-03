@@ -1,52 +1,100 @@
 module RA where
 
+open import Data.Bool using (Bool; T)
+open import Data.Empty using (⊥)
 open import Data.Fin using (Fin)
-open import Data.List using (List; lookup)
-open import Data.List.NonEmpty using (List⁺; toList; length)
+open import Data.List using (List; length; lookup; allFin)
 open import Data.Nat using (ℕ)
 open import Data.Product using (_×_; _,_; Σ-syntax)
-open import Data.String using (String)
+open import Data.String using (String; _==_)
+open import Data.Vec using (Vec; fromList; zip) renaming (allFin to allFinᵛ; length to lengthᵛ)
+open import Function using (flip; _∘₂_; case_of_)
+open import Level using (0ℓ)
+open import Relation.Binary.Construct.Closure.Transitive using (TransClosure)
+open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (Star)
+open import Relation.Binary.Construct.Composition using (_;_)
+open import Relation.Binary.Construct.Never using (Never)
+open import Relation.Binary.Construct.Intersection using (_∩_)
+open import Relation.Binary.Construct.Union using (_∪_)
+open import Relation.Binary.Core using (Rel)
+open import Relation.Binary.Definitions using (Irreflexive)
 open import Relation.Binary.PropositionalEquality using (_≡_)
+open import Relation.Nullary using (¬_)
 
-data MemoryAccessType : Set where
-  read : MemoryAccessType
-  write : MemoryAccessType
-  update : MemoryAccessType
+open Bool
+open List
+open Vec
 
-record MemoryAccess : Set where
+data MemoryAccess : Set where
+  read : MemoryAccess
+  write : MemoryAccess
+
+record Event : Set where
   constructor _▷_＝_
   field
-    type : MemoryAccessType
+    type : MemoryAccess
     location : String
     value : ℕ
 
-open MemoryAccess
-
-Event : Set
-Event = MemoryAccess
-
-data Relation (events : List⁺ Event) : Set where
-  po : Fin (length events) → Fin (length events) → Relation events
-  rf : (from : Fin (length events)) → (to : Fin (length events)) → (Σ[ (location , value) ∈ String × ℕ ] (lookup (toList events) from ≡ write ▷ location ＝ value) × (lookup (toList events) to ≡ read ▷ location ＝ value)) → Relation events
-  mo : (from : Fin (length events)) → (to : Fin (length events)) → (Σ[ location ∈ String ] (Σ[ value ∈ ℕ ] lookup (toList events) from ≡ write ▷ location ＝ value) × (Σ[ value ∈ ℕ ] lookup (toList events) to ≡ write ▷ location ＝ value)) → Relation events
-  fr  : (from : Fin (length events)) → (to : Fin (length events)) → (Σ[ location ∈ String ] (Σ[ value ∈ ℕ ] lookup (toList events) from ≡ read ▷ location ＝ value) × (Σ[ value ∈ ℕ ] lookup (toList events) to ≡ write ▷ location ＝ value)) → Relation events
-  rmw : (from : Fin (length events)) → (to : Fin (length events)) → (Σ[ (location , value) ∈ String × ℕ ] (lookup (toList events) from ≡ read ▷ location ＝ value) × (lookup (toList events) to ≡ write ▷ location ＝ value)) → Relation events
+open Event
 
 record Execution : Set where
-  constructor ra_[_]_
+  constructor ra_[_．_．_．_]
   field
-    events : List⁺ Event
-    initial : List (Fin (length events))
-    relations : List (Relation events)
+    es : List Event
+    poᵇ : Fin (length es) → Fin (length es) → Bool
+    rfᵇ : Fin (length es) → Fin (length es) → Bool
+    moᵇ : Fin (length es) → Fin (length es) → Bool
+    rmwᵇ : Fin (length es) → Fin (length es) → Bool
 
--- isConsistent : Execution → Set
--- isConsistent e = Coh e × sc-per-loc e × atomicity e
---   where
---   Coh : Execution → Set
---   Coh e = {!   !}
+behavior : Execution → List (String × ℕ)
+behavior ra es [ poᵇ ． rfᵇ ． moᵇ ． rmwᵇ ] = let esᵛ = fromList es in check (zip (allFinᵛ (lengthᵛ esᵛ)) esᵛ)
+  where
+  check : {n : ℕ} → Vec (Fin (length es) × Event) n → List (String × ℕ)
+  check [] = []
+  check ((_ , (read ▷ _ ＝ _)) ∷ es₁) = check es₁
+  check ((i , (write ▷ l ＝ v)) ∷ es₁) = case check' i (allFin (length es)) of λ { false → check es₁ ; true → (l , v) ∷ check es₁ }
+    where
+    check' : Fin (length es) → List (Fin (length es)) → Bool
+    check' i [] = true
+    check' i (j ∷ js) with moᵇ i j
+    ... | false = check' i js
+    ... | true = false
 
---   sc-per-loc : Execution → Set
---   sc-per-loc e = {!   !}
+isConsistent : Execution → Set
+isConsistent ra es [ poᵇ ． rfᵇ ． moᵇ ． rmwᵇ ] = Coh × sc-per-loc × atomicity
+  where
+  po : Rel (Fin (length es)) 0ℓ
+  po = T ∘₂ poᵇ
 
---   atomicity : Execution → Set
---   atomicity e = {!   !}
+  poloc : Rel (Fin (length es)) 0ℓ
+  poloc i j with location (lookup es i) == location (lookup es i)
+  ... | false = ⊥
+  ... | true = po i j
+
+  rf : Rel (Fin (length es)) 0ℓ
+  rf = T ∘₂ rfᵇ
+
+  mo : Rel (Fin (length es)) 0ℓ
+  mo = T ∘₂ moᵇ
+
+  fr : Rel (Fin (length es)) 0ℓ
+  fr = rf⁻¹ ; mo
+    where
+    rf⁻¹ : Rel (Fin (length es)) 0ℓ
+    rf⁻¹ = flip rf
+
+  rmw : Rel (Fin (length es)) 0ℓ
+  rmw = T ∘₂ rmwᵇ
+
+  hb : Rel (Fin (length es)) 0ℓ
+  hb = TransClosure (po ∪ rf)
+
+  Coh : Set
+  Coh = Irreflexive _≡_ (hb ; Star (rf ∪ mo ∪ fr))
+
+  sc-per-loc : Set
+  sc-per-loc = Irreflexive _≡_ (poloc ∪ rf ∪ mo ∪ fr)
+
+  atomicity : Set
+  atomicity = ¬ (Σ[ (i , j) ∈ Fin (length es) × Fin (length es) ] (rmw ∩ fr ; mo) i j)
