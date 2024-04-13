@@ -1,100 +1,90 @@
+{-# OPTIONS --without-K --safe #-}
 module RA where
 
+open import Common using (write; read; Event) renaming (behavior to behaviorᶜ)
 open import Data.Bool using (Bool; T)
-open import Data.Empty using (⊥)
 open import Data.Fin using (Fin)
-open import Data.List using (List; length; lookup; allFin)
+open import Data.List using (List; length; lookup)
 open import Data.Nat using (ℕ)
 open import Data.Product using (_×_; _,_; Σ-syntax)
-open import Data.String using (String; _==_)
-open import Data.Vec using (Vec; fromList; zip) renaming (allFin to allFinᵛ; length to lengthᵛ)
-open import Function using (flip; _∘₂_; case_of_)
+open import Data.String using (String)
+open import Data.Sum using (_⊎_)
+open import Function using (_∘₂_; flip)
 open import Level using (0ℓ)
-open import Relation.Binary.Construct.Closure.Transitive using (TransClosure)
+open import Relation.Binary using (Rel)
 open import Relation.Binary.Construct.Closure.ReflexiveTransitive using (Star)
-open import Relation.Binary.Construct.Composition using (_;_)
-open import Relation.Binary.Construct.Never using (Never)
+open import Relation.Binary.Construct.Closure.Transitive using (TransClosure)
 open import Relation.Binary.Construct.Intersection using (_∩_)
 open import Relation.Binary.Construct.Union using (_∪_)
-open import Relation.Binary.Core using (Rel)
+open import Relation.Binary.Construct.Composition using (_;_)
 open import Relation.Binary.Definitions using (Irreflexive)
-open import Relation.Binary.PropositionalEquality using (_≡_)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Relation.Nullary using (¬_)
-
-open Bool
-open List
-open Vec
-
-data MemoryAccess : Set where
-  read : MemoryAccess
-  write : MemoryAccess
-
-record Event : Set where
-  constructor _▷_＝_
-  field
-    type : MemoryAccess
-    location : String
-    value : ℕ
+open import Relation.Unary using (Pred)
 
 open Event
 
-record Execution : Set where
-  constructor ra_[_．_．_．_]
+Program : Set
+Program = List Event
+
+record Execution (p : Program) : Set₁ where
+  constructor ra[_．_．_．_]+[_．_]+[_．_]+[_．_．_．_]+[_]
   field
-    es : List Event
-    poᵇ : Fin (length es) → Fin (length es) → Bool
-    rfᵇ : Fin (length es) → Fin (length es) → Bool
-    moᵇ : Fin (length es) → Fin (length es) → Bool
-    rmwᵇ : Fin (length es) → Fin (length es) → Bool
+    poᵇ : Fin (length p) → Fin (length p) → Bool
+    rfᵇ : Fin (length p) → Fin (length p) → Bool
+    moᵇ : Fin (length p) → Fin (length p) → Bool
+    rmwᵇ : Fin (length p) → Fin (length p) → Bool
 
-behavior : Execution → List (String × ℕ)
-behavior ra es [ poᵇ ． rfᵇ ． moᵇ ． rmwᵇ ] = let esᵛ = fromList es in check (zip (allFinᵛ (lengthᵛ esᵛ)) esᵛ)
-  where
-  check : {n : ℕ} → Vec (Fin (length es) × Event) n → List (String × ℕ)
-  check [] = []
-  check ((_ , (read ▷ _ ＝ _)) ∷ es₁) = check es₁
-  check ((i , (write ▷ l ＝ v)) ∷ es₁) = case check' i (allFin (length es)) of λ { false → check es₁ ; true → (l , v) ∷ check es₁ }
-    where
-    check' : Fin (length es) → List (Fin (length es)) → Bool
-    check' i [] = true
-    check' i (j ∷ js) with moᵇ i j
-    ... | false = check' i js
-    ... | true = false
+    po-irreflexive : {i j : Fin (length p)} → T (poᵇ i j) → i ≢ j
+    po-transitive : {i j k : Fin (length p)} → T (poᵇ i j) → T (poᵇ j k) → T (poᵇ i k)
 
-isConsistent : Execution → Set
-isConsistent ra es [ poᵇ ． rfᵇ ． moᵇ ． rmwᵇ ] = Coh × sc-per-loc × atomicity
-  where
-  po : Rel (Fin (length es)) 0ℓ
+    rf-consistent : {i j : Fin (length p)} → T (rfᵇ i j) → type (lookup p i) ≡ write × type (lookup p j) ≡ read × location (lookup p i) ≡ location (lookup p j) × value (lookup p i) ≡ value (lookup p j)
+    rf-exists-unique : {j : Fin (length p)} → type (lookup p j) ≡ read → Σ[ i ∈ Fin (length p) ] (type (lookup p i) ≡ write × T (rfᵇ i j) × ({x : Fin (length p)} → T (rfᵇ x j) → x ≡ i))
+
+    mo-consistent : {i j : Fin (length p)} →  T (moᵇ i j) → type (lookup p i) ≡ write × type (lookup p j) ≡ write × location (lookup p i) ≡ location (lookup p j)
+    mo-irreflexive : {i j : Fin (length p)} → T (moᵇ i j) → i ≢ j
+    mo-transitive : {i j k : Fin (length p)} → T (moᵇ i j) → T (moᵇ j k) → T (moᵇ i k)
+    mo-total : {i j : Fin (length p)} → type (lookup p i) ≡ write → type (lookup p j) ≡ write → location (lookup p i) ≡ location (lookup p j) → T (moᵇ i j) ⊎ T (moᵇ j i) ⊎ i ≡ j
+
+    rmw-consistent : {i j : Fin (length p)} → T (rmwᵇ i j) → type (lookup p i) ≡ read × type (lookup p j) ≡ write × ¬ (Σ[ x ∈ Fin (length p) ] (T (poᵇ i x) × T (poᵇ x j)))
+
+  po : Rel (Fin (length p)) 0ℓ
   po = T ∘₂ poᵇ
 
-  poloc : Rel (Fin (length es)) 0ℓ
-  poloc i j with location (lookup es i) == location (lookup es i)
-  ... | false = ⊥
-  ... | true = po i j
+  poloc : Rel (Fin (length p)) 0ℓ
+  poloc i j = po i j × location (lookup p i) ≡ location (lookup p j)
 
-  rf : Rel (Fin (length es)) 0ℓ
+  rf : Rel (Fin (length p)) 0ℓ
   rf = T ∘₂ rfᵇ
 
-  mo : Rel (Fin (length es)) 0ℓ
+  mo : Rel (Fin (length p)) 0ℓ
   mo = T ∘₂ moᵇ
 
-  fr : Rel (Fin (length es)) 0ℓ
-  fr = rf⁻¹ ; mo
-    where
-    rf⁻¹ : Rel (Fin (length es)) 0ℓ
-    rf⁻¹ = flip rf
-
-  rmw : Rel (Fin (length es)) 0ℓ
+  rmw : Rel (Fin (length p)) 0ℓ
   rmw = T ∘₂ rmwᵇ
 
-  hb : Rel (Fin (length es)) 0ℓ
+  fr : Rel (Fin (length p)) 0ℓ
+  fr = rf⁻¹ ; mo
+    where
+    rf⁻¹ : Rel (Fin (length p)) 0ℓ
+    rf⁻¹ = flip rf
+
+  hb : Rel (Fin (length p)) 0ℓ
   hb = TransClosure (po ∪ rf)
 
-  Coh : Set
-  Coh = Irreflexive _≡_ (hb ; Star (rf ∪ mo ∪ fr))
+open Execution
 
-  sc-per-loc : Set
-  sc-per-loc = Irreflexive _≡_ (poloc ∪ rf ∪ mo ∪ fr)
+behavior : {p : Program} → (ex : Execution p) → List (String × ℕ)
+behavior {p} ex = behaviorᶜ p (moᵇ ex)
 
-  atomicity : Set
-  atomicity = ¬ (Σ[ (i , j) ∈ Fin (length es) × Fin (length es) ] (rmw ∩ fr ; mo) i j)
+Coh : {p : Program} → Pred (Execution p) 0ℓ
+Coh ex = Irreflexive _≡_ (hb ex ; Star (rf ex ∪ mo ex ∪ fr ex))
+
+sc-per-loc : {p : Program} → Pred (Execution p) 0ℓ
+sc-per-loc ex = Irreflexive _≡_ (TransClosure (poloc ex ∪ rf ex ∪ mo ex ∪ fr ex))
+
+atomicity : {p : Program} → Pred (Execution p) 0ℓ
+atomicity {p} ex = ¬ (Σ[ (i , j) ∈ Fin (length p) × Fin (length p) ] (rmw ex ∩ fr ex ; mo ex) i j)
+
+isConsistent : {p : Program} → Pred (Execution p) 0ℓ
+isConsistent ex = Coh ex × sc-per-loc ex × atomicity ex
