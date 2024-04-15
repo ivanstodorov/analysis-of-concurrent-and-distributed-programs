@@ -145,11 +145,11 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
     convertʳᵉˢᵗ ex {j = j} {k = k} ε (inj₁ mo) with po-dec (toRA (ex'→ex ex)) j k
     ... | no hⁿ = [ inj₂ (inj₂ (inj₁ (mo , hⁿ))) ]
     ... | yes hʸ with mo'-consistent ex mo
-    ...   | hⱼ , hₖ , _ = [ inj₁ (inj₂ (hⱼ , hₖ , hʸ)) ]
+    ...   | hⱼ , hₖ , _ = [ inj₁ (inj₂ (inj₂ (hⱼ , hₖ , hʸ))) ]
     convertʳᵉˢᵗ ex {j = j} {k = k} ε (inj₂ fr@(_ , rf⁻¹ , _)) with po-dec (toRA (ex'→ex ex)) j k
     ... | no hⁿ = [ inj₂ (inj₂ (inj₂ (fr , hⁿ))) ]
     ... | yes hʸ with rf'-consistent ex rf⁻¹
-    ...   | _ , hⱼ , _ = [ inj₁ (inj₁ (hⱼ , hʸ)) ]
+    ...   | _ , hⱼ , _ = [ inj₁ (inj₂ (inj₁ (hⱼ , hʸ))) ]
     convertʳᵉˢᵗ ex (inj₁ rf ◅ ε) (inj₁ mo) with rf'-consistent ex rf | mo'-consistent ex mo
     ... | _ , hr , _ | hw , _ = let h = subst (λ x → x ≡ write) hr hw in case h of λ ()
     convertʳᵉˢᵗ {p} ex {i = i} {k = k} (inj₁ rf ◅ ε) (inj₂ (_ , rf⁻¹ , mo)) with rf'-consistent ex rf
@@ -158,7 +158,7 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
     ...     | heq₁ | heq₂ with po-dec (toRA (ex'→ex ex)) i k
     ...       | no hⁿ = [ inj₂ (inj₂ (inj₁ (subst (λ x → moᵃʳᵐ (ex'→ex ex) x k) (subst (λ x → x ≡ i) (sym heq₂) (sym heq₁)) mo , hⁿ))) ]
     ...       | yes hʸ with mo'-consistent ex mo
-    ...         | hᵢ , hₖ , _ = [ inj₁ (inj₂ (subst (λ x → type (lookup p x) ≡ write) (subst (λ x → x ≡ i) (sym heq₂) (sym heq₁)) hᵢ , hₖ , hʸ)) ]
+    ...         | hᵢ , hₖ , _ = [ inj₁ (inj₂ (inj₂ (subst (λ x → type (lookup p x) ≡ write) (subst (λ x → x ≡ i) (sym heq₂) (sym heq₁)) hᵢ , hₖ , hʸ))) ]
     convertʳᵉˢᵗ ex (inj₁ rf₁ ◅ inj₁ rf₂ ◅ _) _ with rf'-consistent ex rf₁ | rf'-consistent ex rf₂
     ... | _ , hr , _ | hw , _ = let h = subst (λ x → x ≡ write) hr hw in case h of λ ()
     convertʳᵉˢᵗ ex (inj₁ rf ◅ inj₂ (inj₁ mo) ◅ _) _ with rf'-consistent ex rf | mo'-consistent ex mo
@@ -169,35 +169,35 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
     ...     | heq₁ | heq₂ with po-dec (toRA (ex'→ex ex)) i j
     ...       | no hⁿ = inj₂ (inj₂ (inj₁ (subst (λ x → moᵃʳᵐ (ex'→ex ex) x j) (subst (λ x → x ≡ i) (sym heq₂) (sym heq₁)) mo , hⁿ))) ∷ convertʳᵉˢᵗ ex h h'
     ...       | yes hʸ with mo'-consistent ex mo
-    ...         | hᵢ , hⱼ , _ = inj₁ (inj₂ (subst (λ x → type (lookup p x) ≡ write) (subst (λ x → x ≡ i) (sym heq₂) (sym heq₁)) hᵢ , hⱼ , hʸ)) ∷ convertʳᵉˢᵗ ex h h'
+    ...         | hᵢ , hⱼ , _ = inj₁ (inj₂ (inj₂ (subst (λ x → type (lookup p x) ≡ write) (subst (λ x → x ≡ i) (sym heq₂) (sym heq₁)) hᵢ , hⱼ , hʸ))) ∷ convertʳᵉˢᵗ ex h h'
     convertʳᵉˢᵗ ex (_◅_ {i = i} {j = j} (inj₂ (inj₁ mo)) h) h' with po-dec (toRA (ex'→ex ex)) i j
     ... | no hⁿ = inj₂ (inj₂ (inj₁ (mo , hⁿ))) ∷ convertʳᵉˢᵗ ex h h'
     ... | yes hʸ with mo'-consistent ex mo
-    ...   | hᵢ , hⱼ , _ = inj₁ (inj₂ (hᵢ , hⱼ , hʸ)) ∷ convertʳᵉˢᵗ ex h h'
+    ...   | hᵢ , hⱼ , _ = inj₁ (inj₂ (inj₂ (hᵢ , hⱼ , hʸ))) ∷ convertʳᵉˢᵗ ex h h'
     convertʳᵉˢᵗ ex (_◅_ {i = i} {j = j} (inj₂ (inj₂ fr@(_ , rf⁻¹ , _))) h) h' with po-dec (toRA (ex'→ex ex)) i j
     ... | no hⁿ = inj₂ (inj₂ (inj₂ (fr , hⁿ))) ∷ convertʳᵉˢᵗ ex h h'
     ... | yes hʸ with rf'-consistent ex rf⁻¹
-    ...   | _ , hᵢ , _ = inj₁ (inj₁ (hᵢ , hʸ)) ∷ convertʳᵉˢᵗ ex h h'
+    ...   | _ , hᵢ , _ = inj₁ (inj₂ (inj₁ (hᵢ , hʸ))) ∷ convertʳᵉˢᵗ ex h h'
 
     helper-[po+rfe]⁺ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) i j → ob (ex'→ex ex) i j
     helper-[po+rfe]⁺ {p} ex {i = i} [ _ , po , rfe@(rf , _) ] with type (lookup p i) | inspect type (lookup p i)
-    ... | read | [ heq ] = inj₁ (inj₁ (heq , po)) ∷ [ inj₂ (inj₁ rfe) ]
+    ... | read | [ heq ] = inj₁ (inj₂ (inj₁ (heq , po))) ∷ [ inj₂ (inj₁ rfe) ]
     ... | write | [ heqᵢ ] with rf'-consistent ex rf
-    ...   | heqⱼ , _ = inj₁ (inj₂ (heqᵢ , heqⱼ , po)) ∷ [ inj₂ (inj₁ rfe) ]
+    ...   | heqⱼ , _ = inj₁ (inj₂ (inj₂ (heqᵢ , heqⱼ , po))) ∷ [ inj₂ (inj₁ rfe) ]
     helper-[po+rfe]⁺ {p} ex {i} ((_ , po , rfe@(rf , _)) ∷ h) with type (lookup p i) | inspect type (lookup p i)
-    ... | read | [ heq ] = inj₁ (inj₁ (heq , po)) ∷ inj₂ (inj₁ rfe) ∷ helper-[po+rfe]⁺ ex h
+    ... | read | [ heq ] = inj₁ (inj₂ (inj₁ (heq , po))) ∷ inj₂ (inj₁ rfe) ∷ helper-[po+rfe]⁺ ex h
     ... | write | [ heqᵢ ] with rf'-consistent ex rf
-    ...   | heqⱼ , _ = inj₁ (inj₂ (heqᵢ , heqⱼ , po)) ∷ inj₂ (inj₁ rfe) ∷ helper-[po+rfe]⁺ ex h
+    ...   | heqⱼ , _ = inj₁ (inj₂ (inj₂ (heqᵢ , heqⱼ , po))) ∷ inj₂ (inj₁ rfe) ∷ helper-[po+rfe]⁺ ex h
 
     helper-[rfe+po]⁺ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → TransClosure (rfeʳᵃ (toRA (ex'→ex ex)) ; poʳᵃ (toRA (ex'→ex ex))) i j → ob (ex'→ex ex) i j
     helper-[rfe+po]⁺ ex [ _ , rfe@(rf , _) , po ] with rf'-consistent ex rf
-    ... | _ , heq , _ = inj₂ (inj₁ rfe) ∷ [ inj₁ (inj₁ (heq , po)) ]
+    ... | _ , heq , _ = inj₂ (inj₁ rfe) ∷ [ inj₁ (inj₂ (inj₁ (heq , po))) ]
     helper-[rfe+po]⁺ ex ((_ , rfe@(rf , _) , po) ∷ h) with rf'-consistent ex rf
-    ... | _ , heq , _ = inj₂ (inj₁ rfe) ∷ inj₁ (inj₁ (heq , po)) ∷ helper-[rfe+po]⁺ ex h
+    ... | _ , heq , _ = inj₂ (inj₁ rfe) ∷ inj₁ (inj₂ (inj₁ (heq , po))) ∷ helper-[rfe+po]⁺ ex h
 
     convertʰᵇ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → (TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) ∪ TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) ; poʳᵃ (toRA (ex'→ex ex)) ∪ TransClosure (rfeʳᵃ (toRA (ex'→ex ex)) ; poʳᵃ (toRA (ex'→ex ex))) ∪ TransClosure (rfeʳᵃ (toRA (ex'→ex ex)) ; poʳᵃ (toRA (ex'→ex ex))) ; rfeʳᵃ (toRA (ex'→ex ex))) i j → ob (ex'→ex ex) i j
     convertʰᵇ ex (inj₁ [po+rfe]⁺) = helper-[po+rfe]⁺ ex [po+rfe]⁺
-    convertʰᵇ ex (inj₂ (inj₁ (_ , [po+rfe]⁺ , po))) = case helper ex [po+rfe]⁺ of λ heq → helper-[po+rfe]⁺ ex [po+rfe]⁺ ∷ʳ inj₁ (inj₁ (heq , po))
+    convertʰᵇ ex (inj₂ (inj₁ (_ , [po+rfe]⁺ , po))) = case helper ex [po+rfe]⁺ of λ heq → helper-[po+rfe]⁺ ex [po+rfe]⁺ ∷ʳ inj₁ (inj₂ (inj₁ (heq , po)))
       where
       helper : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) i j → type (lookup p j) ≡ read
       helper ex [ _ , _ , rf , _ ] with rf'-consistent ex rf
@@ -216,8 +216,8 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
     convertʰᵇ₂ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → hb (toRA (ex'→ex ex)) i j → (Star (rfʳᵃ (toRA (ex'→ex ex)) ∪ moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) ; (moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex)))) j i → sc-per-locᵃʳᵐ (ex'→ex ex) → ob (ex'→ex ex) i j
     convertʰᵇ₂ {p} ex {i = i} {j = j} h (_ , h' , h'') sᵃʳᵐ with translateʰᵇ (toRA (ex'→ex ex)) h
     ... | inj₁ po with type (lookup p i) | inspect type (lookup p i) | type (lookup p j) | inspect type (lookup p j)
-    ... | read | [ eqᵢ ] | _ | _ = [ inj₁ (inj₁ (eqᵢ , po)) ]
-    ... | write | [ eqᵢ ] | write | [ eqⱼ ] = [ inj₁ (inj₂ (eqᵢ , eqⱼ , po)) ]
+    ... | read | [ eqᵢ ] | _ | _ = [ inj₁ (inj₂ (inj₁ (eqᵢ , po))) ]
+    ... | write | [ eqᵢ ] | write | [ eqⱼ ] = [ inj₁ (inj₂ (inj₂ (eqᵢ , eqⱼ , po))) ]
     ... | write | [ eqᵢ ] | read | [ eqⱼ ] with location (lookup p i) ≟ location (lookup p j)
     ...   | no hneq = ⊥-elim (hneq (sym (helper ex h' h'')))
       where

@@ -89,7 +89,7 @@ record Execution (p : Program) : Set₁ where
   fre i j = fr i j × ¬ po i j
 
   bob : Rel (Fin (length p)) 0ℓ
-  bob = fʳᵐ ∪ fʷʷ
+  bob = f ∪ fʳᵐ ∪ fʷʷ
 
   ob : Rel (Fin (length p)) 0ℓ
   ob = TransClosure (bob ∪ rfe ∪ moe ∪ fre)
@@ -149,9 +149,6 @@ record Execution' (p : Programʳᵃ) : Set₁ where
   moe' : Rel (Fin (length p)) 0ℓ
   moe' i j = mo' i j × ¬ po' i j
 
-  f' : Rel (Fin (length p)) 0ℓ
-  f' = Never
-
   fr' : Rel (Fin (length p)) 0ℓ
   fr' = rf⁻¹ ; mo'
     where
@@ -161,6 +158,9 @@ record Execution' (p : Programʳᵃ) : Set₁ where
   fre' : Rel (Fin (length p)) 0ℓ
   fre' i j = fr' i j × ¬ po' i j
 
+  f' : Rel (Fin (length p)) 0ℓ
+  f' = Never
+
   fʳᵐ' : Rel (Fin (length p)) 0ℓ
   fʳᵐ' i j = type (lookup p i) ≡ read × po' i j
 
@@ -168,7 +168,7 @@ record Execution' (p : Programʳᵃ) : Set₁ where
   fʷʷ' i j = type (lookup p i) ≡ write × type (lookup p j) ≡ write × po' i j
 
   bob' : Rel (Fin (length p)) 0ℓ
-  bob' = fʳᵐ' ∪ fʷʷ'
+  bob' = f' ∪ fʳᵐ' ∪ fʷʷ'
 
   ob' : Rel (Fin (length p)) 0ℓ
   ob' = TransClosure (bob' ∪ rfe' ∪ moe' ∪ fre')
