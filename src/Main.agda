@@ -1,7 +1,7 @@
 {-# OPTIONS --without-K --safe #-}
 module Main where
 
-open import ARM using (Execution'; arm_+_⟪_·_·_⟫_+_⟪_·_⟫_+_⟪_·_·_·_⟫_+_⟪_⟫_⟪_⟫_⟪_⟫; ex'→ex; fromRA) renaming (Execution to Executionᵃʳᵐ; behavior to behaviorᵃʳᵐ; Coh to Cohᵃʳᵐ; sc-per-loc to sc-per-locᵃʳᵐ; atomicity to atomicityᵃʳᵐ; isConsistent to isConsistentᵃʳᵐ)
+open import ARM using (Execution'; arm_+_⟪_·_·_⟫_+_⟪_·_⟫_+_⟪_·_·_·_⟫_+_⟪_⟫_⟪_⟫_⟪_⟫_⟪_⟫; ex'→ex; fromRA) renaming (Execution to Executionᵃʳᵐ; behavior to behaviorᵃʳᵐ; Coh to Cohᵃʳᵐ; sc-per-loc to sc-per-locᵃʳᵐ; atomicity to atomicityᵃʳᵐ; isConsistent to isConsistentᵃʳᵐ)
 open import Common using (read; write; Event)
 open import Data.Bool using (true; false; T)
 open import Data.Empty using (⊥; ⊥-elim)
@@ -35,7 +35,7 @@ theorem : {p : Programʳᵃ} → (ex : Execution' p) → isConsistentᵃʳᵐ (e
 theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳᵐ , hᵃ ex hᵃʳᵐ) , refl
   where
   toRA : {p : Programʳᵃ} → Executionᵃʳᵐ (fromRA p) → Executionʳᵃ p
-  toRA arm po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫ _ ⟪ _ ⟫ _ ⟪ _ ⟫ = ra po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫
+  toRA arm po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫ _ ⟪ _ ⟫ _ ⟪ _ ⟫ _ ⟪ _ ⟫ = ra po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫
 
   hᶜ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → isConsistentᵃʳᵐ (ex'→ex ex) → Cohʳᵃ (toRA (ex'→ex ex))
   hᶜ ex (cᵃʳᵐ , sᵃʳᵐ , _) heq@refl (k , fst , snd) = case translateʳᵉˢᵗ (toRA (ex'→ex ex)) fst snd of λ { (inj₁ x) → cᵃʳᵐ refl (convertʰᵇ₁ ex x)

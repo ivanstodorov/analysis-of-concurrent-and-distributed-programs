@@ -2,6 +2,7 @@
 module ARM where
 
 open import Common using (write; read; Event) renaming (behavior to behaviorᶜ)
+open import Data.Empty.Polymorphic using (⊥-elim)
 open import Data.Fin using (Fin)
 open import Data.List using (List; length; lookup)
 open import Data.Nat using (ℕ)
@@ -17,6 +18,7 @@ open import Relation.Binary.Construct.Closure.Transitive using (TransClosure)
 open import Relation.Binary.Construct.Intersection using (_∩_)
 open import Relation.Binary.Construct.Union using (_∪_)
 open import Relation.Binary.Construct.Composition using (_;_)
+open import Relation.Binary.Construct.Never using (Never)
 open import Relation.Binary.Definitions using (Decidable; Irreflexive)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Relation.Nullary using (¬_)
@@ -31,7 +33,7 @@ fromRA : Programʳᵃ → Program
 fromRA = id
 
 record Execution (p : Program) : Set₁ where
-  constructor arm_+_⟪_·_·_⟫_+_⟪_·_⟫_+_⟪_·_·_·_⟫_+_⟪_⟫_⟪_⟫_⟪_⟫
+  constructor arm_+_⟪_·_·_⟫_+_⟪_·_⟫_+_⟪_·_·_·_⟫_+_⟪_⟫_⟪_⟫_⟪_⟫_⟪_⟫
   field
     po : Rel (Fin (length p)) 0ℓ
     po-dec : Decidable po
@@ -58,6 +60,9 @@ record Execution (p : Program) : Set₁ where
     rmw-dec : Decidable rmw
 
     rmw-consistent : {i j : Fin (length p)} → rmw i j → type (lookup p i) ≡ read × type (lookup p j) ≡ write × ¬ (Σ[ x ∈ Fin (length p) ] (po i x × po x j))
+
+    f : Rel (Fin (length p)) 0ℓ
+    f-consistent : {i j : Fin (length p)} → f i j → po i j
 
     fʳᵐ : Rel (Fin (length p)) 0ℓ
     fʳᵐ-consistent : {i j : Fin (length p)} → fʳᵐ i j → type (lookup p i) ≡ read × po i j
@@ -144,6 +149,9 @@ record Execution' (p : Programʳᵃ) : Set₁ where
   moe' : Rel (Fin (length p)) 0ℓ
   moe' i j = mo' i j × ¬ po' i j
 
+  f' : Rel (Fin (length p)) 0ℓ
+  f' = Never
+
   fr' : Rel (Fin (length p)) 0ℓ
   fr' = rf⁻¹ ; mo'
     where
@@ -168,4 +176,4 @@ record Execution' (p : Programʳᵃ) : Set₁ where
 open Execution'
 
 ex'→ex : {p : Programʳᵃ} → Execution' p → Execution (fromRA p)
-ex'→ex {p} ex@(arm' po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫) = arm po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫ fʳᵐ' ex ⟪ id ⟫ fʷʷ' ex ⟪ id ⟫
+ex'→ex {p} ex@(arm' po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫) = arm po + po-dec ⟪ po-irreflexive · po-transitive · po-exists-unique ⟫ rf + rf-dec ⟪ rf-consistent · rf-exists-unique ⟫ mo + mo-dec ⟪ mo-consistent · mo-irreflexive · mo-transitive · mo-total ⟫ rmw + rmw-dec ⟪ rmw-consistent ⟫ f' ex ⟪ ⊥-elim ⟫ fʳᵐ' ex ⟪ id ⟫ fʷʷ' ex ⟪ id ⟫
