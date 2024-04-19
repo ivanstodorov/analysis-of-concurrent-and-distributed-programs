@@ -53,7 +53,7 @@ record Execution (p : Program) : Set₁ where
     rmw : Rel (Fin (length p)) 0ℓ
     rmw-dec : Decidable rmw
 
-    rmw-consistent : {i j : Fin (length p)} → rmw i j → type (lookup p i) ≡ read × type (lookup p j) ≡ write × ¬ (Σ[ x ∈ Fin (length p) ] (po i x × po x j))
+    rmw-consistent : {i j : Fin (length p)} → rmw i j → type (lookup p i) ≡ read × type (lookup p j) ≡ write × po i j × ¬ (Σ[ x ∈ Fin (length p) ] (po i x × po x j))
 
   poloc : Rel (Fin (length p)) 0ℓ
   poloc i j = po i j × location (lookup p i) ≡ location (lookup p j)

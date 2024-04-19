@@ -39,7 +39,7 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
 
   hᶜ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → isConsistentᵃʳᵐ (ex'→ex ex) → Cohʳᵃ (toRA (ex'→ex ex))
   hᶜ ex (cᵃʳᵐ , sᵃʳᵐ , _) heq@refl (k , fst , snd) = case translateʳᵉˢᵗ (toRA (ex'→ex ex)) fst snd of λ { (inj₁ x) → cᵃʳᵐ refl (convertʰᵇ₁ ex x)
-                                                                                               ; (inj₂ (_ , w , x@(_ , y , z))) → cᵃʳᵐ refl (convertʰᵇ₂ ex w x sᵃʳᵐ ++ convertʳᵉˢᵗ ex y z) }
+                                                                                                        ; (inj₂ (_ , w , x@(_ , y , z))) → cᵃʳᵐ refl (convertʰᵇ₂ ex w x sᵃʳᵐ ++ convertʳᵉˢᵗ ex y z) }
     where
     rfeʳᵃ : {p : Programʳᵃ} → (ex : Executionʳᵃ p) → Rel (Fin (length p)) 0ℓ
     rfeʳᵃ ex i j = rfʳᵃ ex i j × ¬ poʳᵃ ex i j
@@ -133,13 +133,13 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
     ... | no hⁿ = inj₂ (inj₁ (rf , hⁿ))
     ... | yes hʸ = inj₁ hʸ
     translateʰᵇ ex (inj₁ po ∷ h) = case translateʰᵇ-po ex po h of λ { (inj₁ x) → inj₁ x
-                                                                  ; (inj₂ (inj₁ y)) → inj₂ (inj₂ (inj₁ y))
-                                                                  ; (inj₂ (inj₂ z)) → inj₂ (inj₂ (inj₂ (inj₁ z))) }
+                                                                    ; (inj₂ (inj₁ y)) → inj₂ (inj₂ (inj₁ y))
+                                                                    ; (inj₂ (inj₂ z)) → inj₂ (inj₂ (inj₂ (inj₁ z))) }
     translateʰᵇ ex (_∷_ {x = i} {y = j} (inj₂ rf) h) with po-dec ex i j
     ... | no hⁿ = case translateʰᵇ-rfe ex (rf , hⁿ) h of λ x → inj₂ (inj₂ (inj₂ (inj₂ x)))
     ... | yes hʸ = case translateʰᵇ-po ex hʸ h of λ { (inj₁ x) → inj₁ x
-                                                                              ; (inj₂ (inj₁ y)) → inj₂ (inj₂ (inj₁ y))
-                                                                              ; (inj₂ (inj₂ z)) → inj₂ (inj₂ (inj₂ (inj₁ z))) }
+                                                    ; (inj₂ (inj₁ y)) → inj₂ (inj₂ (inj₁ y))
+                                                    ; (inj₂ (inj₂ z)) → inj₂ (inj₂ (inj₂ (inj₁ z))) }
 
     convertʳᵉˢᵗ : {p : Programʳᵃ} → (ex : Execution' p) → {i j k : Fin (length p)} → Star (rfʳᵃ (toRA (ex'→ex ex)) ∪ moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) i j → (moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) j k → ob (ex'→ex ex) i k
     convertʳᵉˢᵗ ex {j = j} {k = k} ε (inj₁ mo) with po-dec (toRA (ex'→ex ex)) j k
@@ -195,31 +195,31 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
     helper-[rfe+po]⁺ ex ((_ , rfe@(rf , _) , po) ∷ h) with rf'-consistent ex rf
     ... | _ , heq , _ = inj₂ (inj₁ rfe) ∷ inj₁ (inj₂ (inj₁ (heq , po))) ∷ helper-[rfe+po]⁺ ex h
 
-    convertʰᵇ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → (TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) ∪ TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) ; poʳᵃ (toRA (ex'→ex ex)) ∪ TransClosure (rfeʳᵃ (toRA (ex'→ex ex)) ; poʳᵃ (toRA (ex'→ex ex))) ∪ TransClosure (rfeʳᵃ (toRA (ex'→ex ex)) ; poʳᵃ (toRA (ex'→ex ex))) ; rfeʳᵃ (toRA (ex'→ex ex))) i j → ob (ex'→ex ex) i j
-    convertʰᵇ ex (inj₁ [po+rfe]⁺) = helper-[po+rfe]⁺ ex [po+rfe]⁺
-    convertʰᵇ ex (inj₂ (inj₁ (_ , [po+rfe]⁺ , po))) = case helper ex [po+rfe]⁺ of λ heq → helper-[po+rfe]⁺ ex [po+rfe]⁺ ∷ʳ inj₁ (inj₂ (inj₁ (heq , po)))
+    convertʰᵇ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → (rfeʳᵃ (toRA (ex'→ex ex)) ∪ TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) ∪ TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) ; poʳᵃ (toRA (ex'→ex ex)) ∪ TransClosure (rfeʳᵃ (toRA (ex'→ex ex)) ; poʳᵃ (toRA (ex'→ex ex))) ∪ TransClosure (rfeʳᵃ (toRA (ex'→ex ex)) ; poʳᵃ (toRA (ex'→ex ex))) ; rfeʳᵃ (toRA (ex'→ex ex))) i j → ob (ex'→ex ex) i j
+    convertʰᵇ _ (inj₁ rfe) = [ inj₂ (inj₁ rfe) ]
+    convertʰᵇ ex (inj₂ (inj₁ [po+rfe]⁺)) = helper-[po+rfe]⁺ ex [po+rfe]⁺
+    convertʰᵇ ex (inj₂ (inj₂ (inj₁ (_ , [po+rfe]⁺ , po)))) = case helper ex [po+rfe]⁺ of λ heq → helper-[po+rfe]⁺ ex [po+rfe]⁺ ∷ʳ inj₁ (inj₂ (inj₁ (heq , po)))
       where
       helper : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → TransClosure (poʳᵃ (toRA (ex'→ex ex)) ; rfeʳᵃ (toRA (ex'→ex ex))) i j → type (lookup p j) ≡ read
       helper ex [ _ , _ , rf , _ ] with rf'-consistent ex rf
       ... | _ , heq , _ = heq
       helper ex (_ ∷ h) = helper ex h
-    convertʰᵇ ex (inj₂ (inj₂ (inj₁ [rfe+po]⁺))) = helper-[rfe+po]⁺ ex [rfe+po]⁺
-    convertʰᵇ ex (inj₂ (inj₂ (inj₂ (_ , [rfe+po]⁺ , rfe)))) = helper-[rfe+po]⁺ ex [rfe+po]⁺ ∷ʳ inj₂ (inj₁ rfe)
+    convertʰᵇ ex (inj₂ (inj₂ (inj₂ (inj₁ [rfe+po]⁺)))) = helper-[rfe+po]⁺ ex [rfe+po]⁺
+    convertʰᵇ ex (inj₂ (inj₂ (inj₂ (inj₂ (_ , [rfe+po]⁺ , rfe))))) = helper-[rfe+po]⁺ ex [rfe+po]⁺ ∷ʳ inj₂ (inj₁ rfe)
 
     convertʰᵇ₁ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i : Fin (length p)} → hb (toRA (ex'→ex ex)) i i → ob (ex'→ex ex) i i
     convertʰᵇ₁ ex h with translateʰᵇ (toRA (ex'→ex ex)) h
-    ... | inj₂ (inj₂ h) = convertʰᵇ ex h
+    ... | inj₂ x = convertʰᵇ ex x
     ... | inj₁ po = ⊥-elim (po-irreflexiveʳᵃ (toRA (ex'→ex ex)) po refl)
-    ... | inj₂ (inj₁ (rf , _)) with rf-consistent (toRA (ex'→ex ex)) rf
-    ...   | hw , hr , _ = let h = subst (λ x → x ≡ write) hr hw in case h of λ ()
 
     convertʰᵇ₂ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j : Fin (length p)} → hb (toRA (ex'→ex ex)) i j → (Star (rfʳᵃ (toRA (ex'→ex ex)) ∪ moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) ; (moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex)))) j i → sc-per-locᵃʳᵐ (ex'→ex ex) → ob (ex'→ex ex) i j
     convertʰᵇ₂ {p} ex {i = i} {j = j} h (_ , h' , h'') sᵃʳᵐ with translateʰᵇ (toRA (ex'→ex ex)) h
+    ... | inj₂ x = convertʰᵇ ex x
     ... | inj₁ po with type (lookup p i) | inspect type (lookup p i) | type (lookup p j) | inspect type (lookup p j)
-    ... | read | [ eqᵢ ] | _ | _ = [ inj₁ (inj₂ (inj₁ (eqᵢ , po))) ]
-    ... | write | [ eqᵢ ] | write | [ eqⱼ ] = [ inj₁ (inj₂ (inj₂ (eqᵢ , eqⱼ , po))) ]
-    ... | write | [ eqᵢ ] | read | [ eqⱼ ] with location (lookup p i) ≟ location (lookup p j)
-    ...   | no hneq = ⊥-elim (hneq (sym (helper ex h' h'')))
+    ...   | read | [ eqᵢ ] | _ | _ = [ inj₁ (inj₂ (inj₁ (eqᵢ , po))) ]
+    ...   | write | [ eqᵢ ] | write | [ eqⱼ ] = [ inj₁ (inj₂ (inj₂ (eqᵢ , eqⱼ , po))) ]
+    ...   | write | [ eqᵢ ] | read | [ eqⱼ ] with location (lookup p i) ≟ location (lookup p j)
+    ...     | no hneq = ⊥-elim (hneq (sym (helper ex h' h'')))
       where
       helper : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j k : Fin (length p)} → Star (rfʳᵃ (toRA (ex'→ex ex)) ∪ moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) i j → (moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) j k → location (lookup p i) ≡ location (lookup p k)
       helper ex ε (inj₁ mo) with mo'-consistent ex mo
@@ -232,13 +232,11 @@ theorem ex hᵃʳᵐ = toRA (ex'→ex ex) , (hᶜ ex hᵃʳᵐ , hˢ ex hᵃʳ�
       ... | _ , _ , heq = trans heq (helper ex h h')
       helper ex (inj₂ (inj₂ (_ , rf⁻¹ , mo)) ◅ h) h' with rf'-consistent ex rf⁻¹ | mo'-consistent ex mo
       ... | _ , _ , heq₁ , _ | _ , _ , heq₂ = trans (trans (sym heq₁) heq₂) (helper ex h h')
-    ...   | yes heq = ⊥-elim (sᵃʳᵐ refl ([ inj₁ (po , heq) ] ++ helper ex h' h''))
+    ...     | yes heq = ⊥-elim (sᵃʳᵐ refl ([ inj₁ (po , heq) ] ++ helper ex h' h''))
       where
       helper : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → {i j k : Fin (length p)} → Star (rfʳᵃ (toRA (ex'→ex ex)) ∪ moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) i j → (moʳᵃ (toRA (ex'→ex ex)) ∪ frʳᵃ (toRA (ex'→ex ex))) j k → TransClosure (polocᵃʳᵐ (ex'→ex ex) ∪ rfᵃʳᵐ (ex'→ex ex) ∪ moᵃʳᵐ (ex'→ex ex) ∪ frᵃʳᵐ (ex'→ex ex)) i k
       helper _ ε x = [ inj₂ (inj₂ x) ]
       helper ex (x ◅ h) h' = inj₂ x ∷ helper ex h h'
-    convertʰᵇ₂ _ _ _ _ | inj₂ (inj₁ rfe) = [ inj₂ (inj₁ rfe) ]
-    convertʰᵇ₂ ex _ _ _ | inj₂ (inj₂ x) = convertʰᵇ ex x
 
   hˢ : {p : Programʳᵃ} → (ex : Execution' (fromRA p)) → isConsistentᵃʳᵐ (ex'→ex ex) → sc-per-locʳᵃ (toRA (ex'→ex ex))
   hˢ ex (_ , sᵃʳᵐ , _) heq@refl h = sᵃʳᵐ heq (convert ex h)
